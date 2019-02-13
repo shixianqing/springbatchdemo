@@ -47,11 +47,13 @@
 
 
 ## 从数据库读取
-    . JdbcPagingItemReader
-    
+   - JdbcPagingItemReader
+   
            . 设置数据源
            . 设置查询条件
            . 将查询结果映射成实体类
+   - MySqlPagingQueryProvider // mysql分页查询支持器
+   
     . 代码示例：
         
         ```
