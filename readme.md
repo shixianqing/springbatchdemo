@@ -54,7 +54,7 @@
            . 将查询结果映射成实体类
    - MySqlPagingQueryProvider // mysql分页查询支持器
    
-    . 代码示例：
+   - 代码示例：
         
         ```
             JdbcPagingItemReader<User> jdbcPagingItemReader = new JdbcPagingItemReader<>();
@@ -130,4 +130,48 @@
 
         return flatFileItemReader;
     ``` 
+
+## 从xml中读取数据
+
+- StaxEventItemReader  xml读取器
+- pom引入jar包
     
+    ``
+    
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.11.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-oxm</artifactId>
+            <version>5.0.8.RELEASE</version>
+        </dependency>
+    ``
+- xstream实现xml转对象
+- spring-oxm遵循xstream接口规范，实现xml转对象
+- 代码示例：
+    
+    ``
+    
+            @Bean
+            public ItemReader<User> xmlItemReader() {
+        
+                StaxEventItemReader<User> staxEventItemReader = new StaxEventItemReader<>();
+                staxEventItemReader.setFragmentRootElementName("user");//设置根标签
+                staxEventItemReader.setResource(new ClassPathResource("/data/user.xml"));//设置文件路径
+        
+                //将xml转成实体对象
+                XStreamMarshaller xStreamMarshaller = new XStreamMarshaller();
+                Map<String,Class> alias = new HashMap<>();
+                alias.put("user",User.class);//key 为根标签，class是key标签下的所有标签映射到的对象
+                xStreamMarshaller.setAliases(alias);
+        
+                staxEventItemReader.setUnmarshaller(xStreamMarshaller);
+        
+                return staxEventItemReader;
+            }
+    
+    ``
