@@ -27,7 +27,7 @@ import org.springframework.validation.BindException;
  * @Date:2019/2/15 16:29
  * @Description: 多文件读取
  **/
-@Configuration
+//@Configuration
 public class MultiFileItemReaderDemo {
 
     @Autowired
