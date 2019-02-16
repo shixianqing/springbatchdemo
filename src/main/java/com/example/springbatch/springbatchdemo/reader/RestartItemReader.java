@@ -24,6 +24,7 @@ public class RestartItemReader implements ItemStreamReader<Hospital> {
     private Boolean restart = false;
     private ExecutionContext executionContext;
 
+
     public void restartReader(){
         flatFileItemReader.setEncoding("utf-8");
         flatFileItemReader.setResource(new ClassPathResource("classpath:/data/hospital_bak.txt"));
@@ -77,7 +78,6 @@ public class RestartItemReader implements ItemStreamReader<Hospital> {
      */
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
-        restartReader();
         this.executionContext = executionContext;
         if (executionContext.containsKey("curLine")){
             this.curLine = executionContext.getLong("curLine");
@@ -87,7 +87,7 @@ public class RestartItemReader implements ItemStreamReader<Hospital> {
             executionContext.put("curLine",this.curLine);
         }
 
-        System.out.println("start reading from line："+this.curLine);
+        System.out.println("【open】 start reading from line："+this.curLine);
     }
 
     /**
