@@ -7,6 +7,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -27,9 +28,6 @@ public class RestartItemReaderDemo {
     private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    private RestartItemReader restartItemReader;
-
-    @Autowired
     private FlatFileWriter flatFileWriter;
 
     @Bean
@@ -44,8 +42,14 @@ public class RestartItemReaderDemo {
 
         return stepBuilderFactory.get("restartItemReaderDemoStep")
                 .<Hospital,Hospital>chunk(10)
-                .reader(restartItemReader)
+                .reader(restartItemReader())
                 .writer(flatFileWriter)
                 .build();
+    }
+
+    @Bean(initMethod = "init")
+    public ItemReader<? extends Hospital> restartItemReader() {
+
+        return new RestartItemReader();
     }
 }

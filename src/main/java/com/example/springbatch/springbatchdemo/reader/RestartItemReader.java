@@ -16,7 +16,7 @@ import org.springframework.validation.BindException;
  * @Date:2019/2/16 16:38
  * @Description: itemReader读取数据异常处理
  **/
-@Component("restartItemReader")
+@Component
 public class RestartItemReader implements ItemStreamReader<Hospital> {
 
     private FlatFileItemReader<Hospital> flatFileItemReader = new FlatFileItemReader<>();
@@ -25,7 +25,7 @@ public class RestartItemReader implements ItemStreamReader<Hospital> {
     private ExecutionContext executionContext;
 
 
-    public void restartReader(){
+    public void init(){
         flatFileItemReader.setEncoding("utf-8");
         flatFileItemReader.setResource(new ClassPathResource("classpath:/data/hospital_bak.txt"));
         DelimitedLineTokenizer delimitedLineTokenizer = new DelimitedLineTokenizer();
@@ -58,7 +58,7 @@ public class RestartItemReader implements ItemStreamReader<Hospital> {
     public Hospital read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         this.curLine++;
         if (restart){
-            flatFileItemReader.setLinesToSkip(curLine.intValue());
+            flatFileItemReader.setLinesToSkip(curLine.intValue() - 1);
             restart = false;
             System.out.println("start reading from line："+curLine);
         }
