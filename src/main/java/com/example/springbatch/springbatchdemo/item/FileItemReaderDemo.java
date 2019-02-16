@@ -24,7 +24,7 @@ import org.springframework.validation.BindException;
  * @Date:2019/2/13 17:58
  * @Description: 从文件中读取数据
  **/
-@Configuration
+//@Configuration
 public class FileItemReaderDemo {
 
     @Autowired

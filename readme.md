@@ -175,3 +175,61 @@
             }
     
     ``
+    
+## 多文件读取
+   - MultiResourceItemReader
+   - 多文件读取，其实就是一个一个文件读取
+   - MultiResourceItemReader需要设置文件读取代理，待读取文件资源
+   - 代码示例：
+    
+        ``
+        
+        
+        @Value("classpath:/data/file*.txt")
+        private Resource[] resources;
+        
+        @Bean
+        public MultiResourceItemReader<Hospital> multiFileItemReader() {
+    
+            MultiResourceItemReader<Hospital> multiResourceItemReader = new MultiResourceItemReader<>();
+            //多文件读取，其实也是一个一个文件进行读取，需要设置文件读取器
+            multiResourceItemReader.setDelegate(flatFileItemReader());
+            multiResourceItemReader.setResources(resources);
+            return multiResourceItemReader;
+        }
+    
+        @Bean
+        public FlatFileItemReader<Hospital> flatFileItemReader(){
+            FlatFileItemReader<Hospital> flatFileItemReader = new FlatFileItemReader<>();
+            flatFileItemReader.setEncoding("utf-8");
+    
+            DelimitedLineTokenizer delimitedLineTokenizer = new DelimitedLineTokenizer();
+            delimitedLineTokenizer.setDelimiter(",");
+            delimitedLineTokenizer.setNames("id","org_name","org_type","addr","allow_no","cert_dept",
+                    "start_valid_date","end_invalid_date");
+    
+            DefaultLineMapper<Hospital> defaultLineMapper = new DefaultLineMapper<>();
+            defaultLineMapper.setLineTokenizer(delimitedLineTokenizer);
+            defaultLineMapper.setFieldSetMapper(new FieldSetMapper<Hospital>() {
+                @Override
+                public Hospital mapFieldSet(FieldSet fieldSet) throws BindException {
+                    Hospital hospital = new Hospital();
+                    hospital.setStartValidDate(fieldSet.readString("start_valid_date"));
+                    hospital.setOrgType(fieldSet.readString("org_type"));
+                    hospital.setOrgName(fieldSet.readString("org_name"));
+                    hospital.setEndValidDate(fieldSet.readString("end_invalid_date"));
+                    hospital.setCertDept(fieldSet.readString("cert_dept"));
+                    hospital.setAllowNo(fieldSet.readString("allow_no"));
+                    hospital.setAddr(fieldSet.readString("addr"));
+                    hospital.setId(fieldSet.readInt("id"));
+                    return hospital;
+                }
+            });
+    
+            flatFileItemReader.setLineMapper(defaultLineMapper);
+    
+            return flatFileItemReader;
+        }
+        ``
+        
+   

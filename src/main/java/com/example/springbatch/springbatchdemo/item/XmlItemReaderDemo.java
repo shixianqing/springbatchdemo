@@ -23,7 +23,7 @@ import java.util.Map;
  * @Date:2019/2/14 19:57
  * @Description: 从xml文件读取数据
  **/
-@Configuration
+//@Configuration
 public class XmlItemReaderDemo {
 
     @Autowired
