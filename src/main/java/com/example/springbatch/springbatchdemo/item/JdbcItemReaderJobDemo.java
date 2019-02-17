@@ -32,7 +32,7 @@ import java.util.*;
  * @Description: 从数据库中读取
  **/
 //@Configuration
-public class JdbcJobDemo {
+public class JdbcItemReaderJobDemo {
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
 
