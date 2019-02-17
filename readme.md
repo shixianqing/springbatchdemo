@@ -232,4 +232,84 @@
         }
         ``
         
-   
+## 从文件中读取，并写入到数据库
+- JdbcBatchItemWriter
+- 代码示例：
+    
+    ```
+    
+        @Bean
+        public ItemWriter<Hospital> jdbcBatchItemWriter() {
+            JdbcBatchItemWriter<Hospital> jdbcBatchItemWriter = new JdbcBatchItemWriter<>();
+            jdbcBatchItemWriter.setDataSource(dataSource);
+            jdbcBatchItemWriter.setSql(
+                    "INSERT INTO `hospital` (`id`, `org_name`, `org_type`, `addr`, `allow_no`, `cert_dept`, `start_valid_date`, `end_invalid_date`) " +
+                            "VALUES (:id, :orgName, :orgType, :addr, :allowNo, :certDept, :startValidDate, :endValidDate)"
+            );
+            //将对象属性值映射到sql参数中
+            jdbcBatchItemWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
+            return jdbcBatchItemWriter;
+        }
+    
+    
+    ```
+     
+## 从数据库读取，写入到普通文件
+- FlatItemFileWriter  
+- 代码示例：
+    
+    ```
+        @Bean
+        public ItemWriter<? super Hospital> flatFileItemWriter() {
+    
+            FlatFileItemWriter<Hospital> flatFileItemWriter = new FlatFileItemWriter<>();
+            flatFileItemWriter.setEncoding("utf-8");
+            //设置存放数据的文件路径
+            flatFileItemWriter.setResource(new FileSystemResource("f:/hospital_generate.txt"));
+    
+            flatFileItemWriter.setLineAggregator(new LineAggregator<Hospital>() {
+                ObjectMapper objectMapper = new ObjectMapper();
+                @Override
+                public String aggregate(Hospital item) {
+                    String result = null;
+                    try {
+                        result = objectMapper.writeValueAsString(item);//将对象转json字符串
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+    
+                    return result;
+                }
+            });
+            return flatFileItemWriter;
+    
+        }
+    ```
+    
+    
+## 从数据库读取并写入到xml文件
+- StaxEventItemWriter
+- XstreamMarshaller - xml标签元素与实体对象映射
+- 代码示例
+
+    ```
+        @Bean
+        public ItemWriter<? super Hospital> xmlFileItemWriter() {
+            StaxEventItemWriter<Hospital> staxEventItemWriter = new StaxEventItemWriter<>();
+            staxEventItemWriter.setEncoding("utf-8");
+            staxEventItemWriter.setResource(new FileSystemResource("f:/hospital.xml"));
+            staxEventItemWriter.setRootTagName("hospitals");
+    
+            //XML标签与实体对象映射
+            Map<String,Class<Hospital>> alias = new HashMap<>();
+            alias.put("hospital",Hospital.class);
+    
+            XStreamMarshaller xStreamMarshaller = new XStreamMarshaller();
+            xStreamMarshaller.setAliases(alias);
+    
+            staxEventItemWriter.setMarshaller(xStreamMarshaller);
+    
+            return staxEventItemWriter;
+    
+        }
+    ```
