@@ -29,7 +29,7 @@ import java.util.Map;
  * @Date:2019/2/17 16:03
  * @Description: 从数据库读取数据写入到xml文件中
  **/
-@Configuration
+//@Configuration
 public class XmlFileItemWriterJobDemo {
 
     @Autowired

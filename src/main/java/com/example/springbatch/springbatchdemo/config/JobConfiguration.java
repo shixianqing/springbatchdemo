@@ -19,8 +19,7 @@ import org.springframework.context.annotation.Configuration;
  * @Description: 任务配置类
  * 任务需要步骤去执行的
  **/
-@Configuration
-@EnableBatchProcessing //开启批处理
+//@Configuration
 public class JobConfiguration {
 
     /**

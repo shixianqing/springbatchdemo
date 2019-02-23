@@ -21,8 +21,7 @@ import org.springframework.context.annotation.Configuration;
  * @Description: 每个flow可以由多个step组成，一个job可以由多个flow或step组成
  * 每个flow是由FlowBuilder创建
  **/
-@Configuration
-@EnableBatchProcessing
+//@Configuration
 public class FlowJobDemo {
 
     @Autowired

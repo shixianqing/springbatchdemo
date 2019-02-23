@@ -313,3 +313,194 @@
     
         }
     ```
+    
+
+
+## 错误重试
+-   在读取数据，处理数据，写数据时，可以通过容错，设置重试次数，重试处理
+-   faultTolerant() 使得step具备容错能力
+-   retry(Class<? extends Throwable> type) 出现何种异常时，进行重试
+-   retryLimit(int retryLimit) 重试次数
+-   代码示例
+
+    - step
+    ```
+       @Bean
+        public Step retryDemoStep() {
+            return stepBuilderFactory.get("retryDemoStep")
+                    .<String,String>chunk(10)
+                    .reader(retryDemoReader())
+                    .processor(retryDemoProcess)
+                    .writer(retryDemoWriter)
+                    .faultTolerant()//容错
+                    .retry(CustomerRetryException.class)//出现CustomerRetryException异常时，进行重试
+                    .retryLimit(5)//重试次数，超过次数，任务结束
+                    .build();
+        }
+    ```
+
+    - reader
+    ```
+        @Bean
+        public ListItemReader<String> retryDemoReader() {
+            List<String> list = new ArrayList<>();
+    
+            for (int i=1;i<60;i++){
+                list.add(String.valueOf(i));
+            }
+    
+            return new ListItemReader<>(list);
+        }
+    
+    ```
+    - writer
+    
+    ```
+    @Component("retryDemoWriter")
+    public class RetryDemoWriter implements ItemWriter<String> {
+    
+    
+        @Override
+        public void write(List<? extends String> items) throws Exception {
+    
+           for (String item:items){
+               System.out.println("----------输出："+item+"----------------");
+           }
+        }
+    }
+    ```
+    - process
+    
+    ```
+    @Component("retryDemoProcess")
+    public class RetryDemoProcess implements ItemProcessor<String,String> {
+    
+        private int attemptCount;
+    
+        @Override
+        public String process(String item) throws Exception {
+    
+            System.out.println("processing item is "+item);
+    
+            if ("26".equals(item)){
+                attemptCount++;
+                if (attemptCount >= 3){
+                    System.out.println("retried "+attemptCount+" times success");
+                    return String.valueOf(Integer.valueOf(item) * -1);
+                } else {
+    
+                    throw new CustomerRetryException("process failed，attempt："+attemptCount);
+                }
+            }
+            return String.valueOf(Integer.valueOf(item) * -1);
+        }
+    }
+    ```
+    
+## 错误跳过
+
+- 在读取数据，处理数据，写数据时，出现异常，跳过该异常数据
+- faultTolerant() 使得step具备容错能力
+- skip(Class<? extends Throwable> type) 出现异常时，跳过
+- skipLimit(int skipLimit) 跳过次数
+
+    - step
+    ```
+          @Bean
+           public Step skipDemoStep() {
+       
+              return stepBuilderFactory.get("skipDemoStep")
+                       .<String,String>chunk(10)
+                       .reader(skipDemoReader())
+                       .processor(skipDemoProcess)
+                       .writer(skipDemoWriter)
+                       .faultTolerant()
+                       .skip(CustomerRetryException.class)
+                       .skipLimit(5)
+                       .build();
+           }
+    ```
+    
+    - reader
+    ```
+        @Bean
+        public ListItemReader<String> skipDemoReader() {
+            List<String> list = new ArrayList<>();
+    
+            for (int i=1;i<60;i++){
+                list.add(String.valueOf(i));
+            }
+    
+            return new ListItemReader<>(list);
+        }
+    ```
+    
+    - writer
+    
+    ```
+    @Component("skipDemoWriter")
+    public class SkipDemoWriter implements ItemWriter<String> {
+    
+    
+        @Override
+        public void write(List<? extends String> items) throws Exception {
+    
+           for (String item:items){
+               System.out.println("----------输出："+item+"----------------");
+           }
+        }
+    }
+    ```
+    
+   - process
+   
+   ```
+   @Component("skipDemoProcess")
+   public class SkipDemoProcess implements ItemProcessor<String,String> {
+   
+       private int attemptCount;
+   
+       @Override
+       public String process(String item) throws Exception {
+   
+           System.out.println("processing item is "+item);
+   
+           if ("26".equals(item)){
+               attemptCount++;
+               if (attemptCount >= 3){
+                   System.out.println("retried "+attemptCount+" times success");
+                   return String.valueOf(Integer.valueOf(item) * -1);
+               } else {
+   
+                   throw new CustomerRetryException("process failed，attempt："+attemptCount);
+               }
+           }
+           return String.valueOf(Integer.valueOf(item) * -1);
+       }
+   }
+   ```
+   
+## 错误跳过监听器
+
+- 可以监听发生错误时，做出相关处理
+- 需要实现SkipListener接口
+- listener(SkipListener<? super I, ? super O> listener) 给step添加监听
+- 代码示例
+    
+     - step
+     ```
+         @Bean
+         public Step skipListenerDemoStep() {
+     
+             return stepBuilderFactory.get("skipListenerDemoStep")
+                     .<String,String>chunk(10)
+                     .reader(skipListenerDemoReader())
+                     .processor(skipDemoProcess)
+                     .writer(skipDemoWriter)
+                     .faultTolerant()
+                     .skip(CustomerRetryException.class)
+                     .skipLimit(5)
+                     .listener(mySkipListener)
+                     .build();
+         }
+     ```

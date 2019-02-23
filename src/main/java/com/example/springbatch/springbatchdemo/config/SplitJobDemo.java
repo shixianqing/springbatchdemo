@@ -21,8 +21,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
  * @Date:2019/1/3117:48
  * @Description: 并行执行多个flow
  **/
-@Configuration
-@EnableBatchProcessing
+//@Configuration
 public class SplitJobDemo {
 
     @Autowired
